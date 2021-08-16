@@ -611,6 +611,23 @@ func (rpc *FlashbotsRPC) FlashbotsSimulateBlock(privKey *ecdsa.PrivateKey, block
 	txs := make([]string, 0)
 	for _, tx := range block.Transactions() {
 		// fmt.Println("tx", i, tx.Hash(), "type", tx.Type())
+		from, fromErr := types.Sender(types.LatestSignerForChainID(tx.ChainId()), tx)
+		txIsFromCoinbase := fromErr == nil && from == block.Coinbase()
+		if txIsFromCoinbase {
+			if rpc.Debug {
+				fmt.Printf("- skip tx from coinbase: %s\n", tx.Hash())
+			}
+			continue
+		}
+
+		to := tx.To()
+		txIsToCoinbase := to != nil && *to == block.Coinbase()
+		if txIsToCoinbase {
+			if rpc.Debug {
+				fmt.Printf("- skip tx to coinbase: %s\n", tx.Hash())
+			}
+			continue
+		}
 
 		rlp := TxToRlp(tx)
 
