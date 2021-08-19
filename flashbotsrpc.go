@@ -161,7 +161,7 @@ func (rpc *FlashbotsRPC) CallWithFlashbotsSignature(method string, privKey *ecds
 	req.Header.Add("Accept", "application/json")
 	req.Header.Add("X-Flashbots-Signature", signature)
 	httpClient := &http.Client{
-		Timeout: time.Second * 5,
+		Timeout: time.Second * 30,
 	}
 
 	response, err := httpClient.Do(req)
