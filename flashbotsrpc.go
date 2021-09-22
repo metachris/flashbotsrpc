@@ -602,6 +602,16 @@ func (rpc *FlashbotsRPC) FlashbotsCallBundle(privKey *ecdsa.PrivateKey, param Fl
 	return res, err
 }
 
+// https://docs.flashbots.net/flashbots-auction/searchers/advanced/rpc-endpoint/#eth_sendbundle
+func (rpc *FlashbotsRPC) FlashbotsSendBundle(privKey *ecdsa.PrivateKey, param FlashbotsSendBundleRequest) (res FlashbotsSendBundleResponse, err error) {
+	rawMsg, err := rpc.CallWithFlashbotsSignature("eth_sendBundle", privKey, param)
+	if err != nil {
+		return res, err
+	}
+	err = json.Unmarshal(rawMsg, &res)
+	return res, err
+}
+
 // numTx is the maximum number of tx to include (used for troubleshooting). default 0 (all transactions)
 func (rpc *FlashbotsRPC) FlashbotsSimulateBlock(privKey *ecdsa.PrivateKey, block *types.Block, maxTx int) (res FlashbotsCallBundleResponse, err error) {
 	if rpc.Debug {
