@@ -364,3 +364,15 @@ type FlashbotsCallBundleResponse struct {
 	StateBlockNumber  int64                       `json:"stateBlockNumber"`  // 12960319,
 	TotalGasUsed      int64                       `json:"totalGasUsed"`      // 63197
 }
+
+type FlashbotsSendBundleRequest struct {
+	Txs          []string  `json:"txs"`                         // Array[String], A list of signed transactions to execute in an atomic bundle
+	BlockNumber  string    `json:"blockNumber"`                 // String, a hex encoded block number for which this bundle is valid on
+	MinTimestamp *uint64   `json:"minTimestamp,omitempty"`      // (Optional) Number, the minimum timestamp for which this bundle is valid, in seconds since the unix epoch
+	MaxTimestamp *uint64   `json:"maxTimestamp,omitempty"`      // (Optional) Number, the maximum timestamp for which this bundle is valid, in seconds since the unix epoch
+	RevertingTxs *[]string `json:"revertingTxHashes,omitempty"` // (Optional) Array[String], A list of tx hashes that are allowed to revert
+}
+
+type FlashbotsSendBundleResponse struct {
+	BundleHash string `json:"bundleHash"`
+}
