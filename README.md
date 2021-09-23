@@ -10,7 +10,7 @@ Fork of [ethrpc](https://github.com/onrik/ethrpc) with additional [Flashbots RPC
 ## Usage
 
 ```go
-rpc := flashbotsrpc.NewFlashbotsRPC("https://relay.flashbots.net")
+rpc := flashbotsrpc.New("https://relay.flashbots.net")
 
 // Creating a new private key here for testing; you probably would want to use an existing one
 privateKey, _ := crypto.GenerateKey() 

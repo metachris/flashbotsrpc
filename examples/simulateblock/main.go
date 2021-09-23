@@ -60,7 +60,7 @@ func main() {
 		return
 	}
 
-	rpc := flashbotsrpc.NewFlashbotsRPC(*mevGethUriPtr)
+	rpc := flashbotsrpc.New(*mevGethUriPtr)
 	rpc.Debug = *debugPtr
 
 	privateKey, _ := crypto.GenerateKey()

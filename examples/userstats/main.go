@@ -10,7 +10,7 @@ import (
 var privateKey, _ = crypto.GenerateKey() // creating a new private key for testing. you probably want to use an existing key.
 
 func main() {
-	rpc := flashbotsrpc.NewFlashbotsRPC("https://relay.flashbots.net")
+	rpc := flashbotsrpc.New("https://relay.flashbots.net")
 
 	// Query relay for user stats
 	result, err := rpc.FlashbotsGetUserStats(privateKey, 13281018)
