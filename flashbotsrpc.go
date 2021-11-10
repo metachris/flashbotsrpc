@@ -12,6 +12,8 @@ import (
 	"os"
 	"time"
 
+	"github.com/pkg/errors"
+
 	"github.com/ethereum/go-ethereum/accounts"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/core/types"
@@ -179,6 +181,13 @@ func (rpc *FlashbotsRPC) CallWithFlashbotsSignature(method string, privKey *ecds
 
 	if rpc.Debug {
 		rpc.log.Println(fmt.Sprintf("%s\nRequest: %s\nSignature: %s\nResponse: %s\n", method, body, signature, data))
+	}
+
+	// On error, response looks like this instead of JSON-RPC: {"error":"block param must be a hex int"}
+	errorResp := new(RelayErrorResponse)
+	if err := json.Unmarshal(data, errorResp); err == nil && errorResp.Error != "" {
+		// relay returned an error
+		return nil, errors.New(errorResp.Error)
 	}
 
 	resp := new(rpcResponse)
