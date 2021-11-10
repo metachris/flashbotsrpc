@@ -321,6 +321,10 @@ func (proxy *proxyBlockWithoutTransactions) toBlock() Block {
 	return block
 }
 
+type RelayErrorResponse struct {
+	Error string `json:"error"`
+}
+
 type FlashbotsUserStats struct {
 	IsHighPriority       bool   `json:"is_high_priority"`
 	AllTimeMinerPayments string `json:"all_time_miner_payments"`
