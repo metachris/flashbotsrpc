@@ -2,12 +2,14 @@
 
 Fork of [ethrpc](https://github.com/onrik/ethrpc) with additional [Flashbots RPC methods](https://docs.flashbots.net/flashbots-auction/searchers/advanced/rpc-endpoint):
 
-* `FlashbotsGetUserStats`
-* `FlashbotsCallBundle`
-* `FlashbotsSendBundle`
+* `FlashbotsCallBundle` ([`eth_callBundle`](https://docs.flashbots.net/flashbots-auction/searchers/advanced/rpc-endpoint/#eth_callbundle))
+* `FlashbotsSendBundle` ([`eth_sendBundle`](https://docs.flashbots.net/flashbots-auction/searchers/advanced/rpc-endpoint/#eth_sendbundle))
+* `FlashbotsGetUserStats` ([`flashbots_getUserStats`](https://docs.flashbots.net/flashbots-auction/searchers/advanced/rpc-endpoint/#flashbots_getuserstats))
 * `FlashbotsSimulateBlock`: simulate a full block
 
 ## Usage
+
+`go get github.com/metachris/flashbotsrpc`
 
 ```go
 rpc := flashbotsrpc.New("https://relay.flashbots.net")
@@ -15,30 +17,26 @@ rpc := flashbotsrpc.New("https://relay.flashbots.net")
 // Creating a new private key here for testing, you probably want to use an existing one
 privateKey, _ := crypto.GenerateKey()
 
-func getUserStats() {
-	result, err := rpc.FlashbotsGetUserStats(privateKey, 13281018)
-	if err != nil {
-		log.Fatal(err)
-	}
+// flashbots_getUserStats example
+// ------------------------------
+result, err := rpc.FlashbotsGetUserStats(privateKey, 13281018)
+if err != nil {
+    log.Fatal(err)
+}
+fmt.Printf("%+v\n", result)
 
-	// Print result
-	fmt.Printf("%+v\n", result)
+// eth_sendBundle example
+// ----------------------
+sendBundleArgs := flashbotsrpc.FlashbotsSendBundleRequest{
+    Txs:         []string{"YOUR_HASH"},
+    BlockNumber: fmt.Sprintf("0x%x", 13281018),
 }
 
-func sendBundle() {
-	sendBundleArgs := flashbotsrpc.FlashbotsSendBundleRequest{
-		Txs:         []string{"YOUR_HASH"},
-		BlockNumber: fmt.Sprintf("0x%x", 13281018),
-	}
-
-	result, err := rpc.FlashbotsSendBundle(privateKey, sendBundleArgs)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	// Print result
-	fmt.Printf("%+v\n", result)
+result, err := rpc.FlashbotsSendBundle(privateKey, sendBundleArgs)
+if err != nil {
+    log.Fatal(err)
 }
+fmt.Printf("%+v\n", result)
 ```
 
-You can find [more examples in `/examples/`](https://github.com/metachris/flashbotsrpc/tree/master/examples).
+You can find example code in the [`/examples/` directory](https://github.com/metachris/flashbotsrpc/tree/master/examples).
