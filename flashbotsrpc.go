@@ -621,7 +621,7 @@ func (rpc *FlashbotsRPC) FlashbotsSendBundle(privKey *ecdsa.PrivateKey, param Fl
 	return res, err
 }
 
-// numTx is the maximum number of tx to include (used for troubleshooting). default 0 (all transactions)
+// Simulate a full Ethereum block. numTx is the maximum number of tx to include, used for troubleshooting (default: 0 - all transactions)
 func (rpc *FlashbotsRPC) FlashbotsSimulateBlock(privKey *ecdsa.PrivateKey, block *types.Block, maxTx int) (res FlashbotsCallBundleResponse, err error) {
 	if rpc.Debug {
 		fmt.Printf("Simulating block %s 0x%x %s \t %d tx \t timestamp: %d\n", block.Number(), block.Number(), block.Header().Hash(), len(block.Transactions()), block.Header().Time)
@@ -681,4 +681,24 @@ func (rpc *FlashbotsRPC) FlashbotsSimulateBlock(privKey *ecdsa.PrivateKey, block
 
 	res, err = rpc.FlashbotsCallBundle(privKey, params)
 	return res, err
+}
+
+// docs todo
+func (rpc *FlashbotsRPC) FlashbotsSendPrivateTransaction(privKey *ecdsa.PrivateKey, param FlashbotsSendPrivateTransactionRequest) (txHash string, err error) {
+	rawMsg, err := rpc.CallWithFlashbotsSignature("eth_sendPrivateTransaction", privKey, param)
+	if err != nil {
+		return "", err
+	}
+	err = json.Unmarshal(rawMsg, &txHash)
+	return txHash, err
+}
+
+// docs todo
+func (rpc *FlashbotsRPC) FlashbotsCancelPrivateTransaction(privKey *ecdsa.PrivateKey, param FlashbotsCancelPrivateTransactionRequest) (cancelled bool, err error) {
+	rawMsg, err := rpc.CallWithFlashbotsSignature("eth_sendPrivateTransaction", privKey, param)
+	if err != nil {
+		return false, err
+	}
+	err = json.Unmarshal(rawMsg, &cancelled)
+	return cancelled, err
 }

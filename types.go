@@ -369,6 +369,7 @@ type FlashbotsCallBundleResponse struct {
 	TotalGasUsed      int64                       `json:"totalGasUsed"`      // 63197
 }
 
+// sendBundle
 type FlashbotsSendBundleRequest struct {
 	Txs          []string  `json:"txs"`                         // Array[String], A list of signed transactions to execute in an atomic bundle
 	BlockNumber  string    `json:"blockNumber"`                 // String, a hex encoded block number for which this bundle is valid on
@@ -379,4 +380,14 @@ type FlashbotsSendBundleRequest struct {
 
 type FlashbotsSendBundleResponse struct {
 	BundleHash string `json:"bundleHash"`
+}
+
+// sendPrivateTransaction
+type FlashbotsSendPrivateTransactionRequest struct {
+	Tx string `json:"tx"`
+}
+
+// cancelPrivateTransaction
+type FlashbotsCancelPrivateTransactionRequest struct {
+	TxHash string `json:"txHash"`
 }
