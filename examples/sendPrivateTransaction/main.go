@@ -9,21 +9,23 @@ import (
 )
 
 var privateKey, _ = crypto.GenerateKey() // creating a new private key for testing. you probably want to use an existing key.
+// var privateKey, _ = crypto.HexToECDSA("YOUR_PRIVATE_KEY")
 
 func main() {
 	rpc := flashbotsrpc.New("https://relay.flashbots.net")
 	rpc.Debug = true
 
 	sendPrivTxArgs := flashbotsrpc.FlashbotsSendPrivateTransactionRequest{
-		Tx: "0xYourTxHash",
+		Tx: "0xYOUR_RAW_TX",
 	}
 
 	txHash, err := rpc.FlashbotsSendPrivateTransaction(privateKey, sendPrivTxArgs)
 	if err != nil {
 		if errors.Is(err, flashbotsrpc.ErrRelayErrorResponse) {
-			fmt.Println(err.Error()) // standard error response from relay
+			// ErrRelayErrorResponse means it's a standard Flashbots relay error response, so probably a user error, rather than JSON or network error
+			fmt.Println(err.Error())
 		} else {
-			fmt.Printf("unknown error: %+v\n", err)
+			fmt.Printf("error: %+v\n", err)
 		}
 		return
 	}

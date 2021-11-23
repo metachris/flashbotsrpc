@@ -693,7 +693,7 @@ func (rpc *FlashbotsRPC) FlashbotsSendPrivateTransaction(privKey *ecdsa.PrivateK
 
 // docs todo
 func (rpc *FlashbotsRPC) FlashbotsCancelPrivateTransaction(privKey *ecdsa.PrivateKey, param FlashbotsCancelPrivateTransactionRequest) (cancelled bool, err error) {
-	rawMsg, err := rpc.CallWithFlashbotsSignature("eth_sendPrivateTransaction", privKey, param)
+	rawMsg, err := rpc.CallWithFlashbotsSignature("eth_cancelPrivateTransaction", privKey, param)
 	if err != nil {
 		return false, err
 	}

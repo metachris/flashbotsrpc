@@ -9,6 +9,7 @@ import (
 	"github.com/pkg/errors"
 )
 
+// ErrRelayErrorResponse means it's a standard Flashbots relay error response - probably a user error rather than JSON or network error
 var ErrRelayErrorResponse = errors.New("relay error response")
 
 // Syncing - object with syncing data info
