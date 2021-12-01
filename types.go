@@ -5,7 +5,12 @@ import (
 	"encoding/json"
 	"math/big"
 	"unsafe"
+
+	"github.com/pkg/errors"
 )
+
+// ErrRelayErrorResponse means it's a standard Flashbots relay error response - probably a user error rather than JSON or network error
+var ErrRelayErrorResponse = errors.New("relay error response")
 
 // Syncing - object with syncing data info
 type Syncing struct {
@@ -369,6 +374,7 @@ type FlashbotsCallBundleResponse struct {
 	TotalGasUsed      int64                       `json:"totalGasUsed"`      // 63197
 }
 
+// sendBundle
 type FlashbotsSendBundleRequest struct {
 	Txs          []string  `json:"txs"`                         // Array[String], A list of signed transactions to execute in an atomic bundle
 	BlockNumber  string    `json:"blockNumber"`                 // String, a hex encoded block number for which this bundle is valid on
@@ -379,4 +385,14 @@ type FlashbotsSendBundleRequest struct {
 
 type FlashbotsSendBundleResponse struct {
 	BundleHash string `json:"bundleHash"`
+}
+
+// sendPrivateTransaction
+type FlashbotsSendPrivateTransactionRequest struct {
+	Tx string `json:"tx"`
+}
+
+// cancelPrivateTransaction
+type FlashbotsCancelPrivateTransactionRequest struct {
+	TxHash string `json:"txHash"`
 }

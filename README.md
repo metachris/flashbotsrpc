@@ -5,6 +5,8 @@ Fork of [ethrpc](https://github.com/onrik/ethrpc) with additional [Flashbots RPC
 * `FlashbotsCallBundle` ([`eth_callBundle`](https://docs.flashbots.net/flashbots-auction/searchers/advanced/rpc-endpoint/#eth_callbundle))
 * `FlashbotsSendBundle` ([`eth_sendBundle`](https://docs.flashbots.net/flashbots-auction/searchers/advanced/rpc-endpoint/#eth_sendbundle))
 * `FlashbotsGetUserStats` ([`flashbots_getUserStats`](https://docs.flashbots.net/flashbots-auction/searchers/advanced/rpc-endpoint/#flashbots_getuserstats))
+* `FlashbotsSendPrivateTransaction` (`eth_sendPrivateTransaction`)
+* `FlashbotsCancelPrivateTransaction` (`eth_cancelPrivateTransaction`)
 * `FlashbotsSimulateBlock`: simulate a full block
 
 ## Usage

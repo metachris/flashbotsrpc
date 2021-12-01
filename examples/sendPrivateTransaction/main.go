@@ -13,9 +13,13 @@ var privateKey, _ = crypto.GenerateKey() // creating a new private key for testi
 
 func main() {
 	rpc := flashbotsrpc.New("https://relay.flashbots.net")
+	rpc.Debug = true
 
-	// Query relay for user stats
-	result, err := rpc.FlashbotsGetUserStats(privateKey, 13281018)
+	sendPrivTxArgs := flashbotsrpc.FlashbotsSendPrivateTransactionRequest{
+		Tx: "0xYOUR_RAW_TX",
+	}
+
+	txHash, err := rpc.FlashbotsSendPrivateTransaction(privateKey, sendPrivTxArgs)
 	if err != nil {
 		if errors.Is(err, flashbotsrpc.ErrRelayErrorResponse) {
 			// ErrRelayErrorResponse means it's a standard Flashbots relay error response, so probably a user error, rather than JSON or network error
@@ -26,6 +30,6 @@ func main() {
 		return
 	}
 
-	// Print result
-	fmt.Printf("%+v\n", result)
+	// Print txHash
+	fmt.Printf("txHash: %s\n", txHash)
 }
