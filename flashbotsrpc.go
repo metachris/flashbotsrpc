@@ -194,7 +194,7 @@ func (rpc *FlashbotsRPC) CallWithFlashbotsSignature(method string, privKey *ecds
 	}
 
 	if resp.Error != nil {
-		return nil, *resp.Error
+		return nil, fmt.Errorf("%w: %s", ErrRelayErrorResponse, (*resp).Error.Message)
 	}
 
 	return resp.Result, nil
