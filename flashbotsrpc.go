@@ -44,18 +44,22 @@ type rpcRequest struct {
 
 // FlashbotsRPC - Ethereum rpc client
 type FlashbotsRPC struct {
-	url    string
-	client httpClient
-	log    logger
-	Debug  bool
+	url     string
+	client  httpClient
+	log     logger
+	Debug   bool
+	Headers map[string]string // Additional headers to send with the request
+	Timeout time.Duration
 }
 
 // New create new rpc client with given url
 func New(url string, options ...func(rpc *FlashbotsRPC)) *FlashbotsRPC {
 	rpc := &FlashbotsRPC{
-		url:    url,
-		client: http.DefaultClient,
-		log:    log.New(os.Stderr, "", log.LstdFlags),
+		url:     url,
+		client:  http.DefaultClient,
+		log:     log.New(os.Stderr, "", log.LstdFlags),
+		Headers: make(map[string]string),
+		Timeout: 30 * time.Second,
 	}
 	for _, option := range options {
 		option(rpc)
@@ -101,7 +105,21 @@ func (rpc *FlashbotsRPC) Call(method string, params ...interface{}) (json.RawMes
 		return nil, err
 	}
 
-	response, err := rpc.client.Post(rpc.url, "application/json", bytes.NewBuffer(body))
+	req, err := http.NewRequest("POST", rpc.url, bytes.NewBuffer(body))
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("Accept", "application/json")
+	for k, v := range rpc.Headers {
+		req.Header.Add(k, v)
+	}
+	httpClient := &http.Client{
+		Timeout: rpc.Timeout,
+	}
+
+	response, err := httpClient.Do(req)
 	if response != nil {
 		defer response.Body.Close()
 	}
@@ -160,8 +178,11 @@ func (rpc *FlashbotsRPC) CallWithFlashbotsSignature(method string, privKey *ecds
 	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("Accept", "application/json")
 	req.Header.Add("X-Flashbots-Signature", signature)
+	for k, v := range rpc.Headers {
+		req.Header.Add(k, v)
+	}
 	httpClient := &http.Client{
-		Timeout: time.Second * 30,
+		Timeout: rpc.Timeout,
 	}
 
 	response, err := httpClient.Do(req)
