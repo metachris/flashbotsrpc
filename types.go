@@ -361,6 +361,8 @@ type FlashbotsCallBundleResult struct {
 	ToAddress         string `json:"toAddress"`         // "0xdAC17F958D2ee523a2206206994597C13D831ec7",
 	TxHash            string `json:"txHash"`            // "0xe2df005210bdc204a34ff03211606e5d8036740c686e9fe4e266ae91cf4d12df",
 	Value             string `json:"value"`             // "0x"
+	Error             string `json:"error"`
+	Revert            string `json:"revert"`
 }
 
 type FlashbotsCallBundleResponse struct {
