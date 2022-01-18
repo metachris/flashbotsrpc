@@ -13,17 +13,15 @@ var privateKey, _ = crypto.GenerateKey() // creating a new private key for testi
 
 func main() {
 	rpc := flashbotsrpc.New("https://relay.flashbots.net")
-	rpc.Debug = true
-
-	sendBundleArgs := flashbotsrpc.FlashbotsSendBundleRequest{
-		Txs:         []string{"YOUR_RAW_TX"},
-		BlockNumber: fmt.Sprintf("0x%x", 13281018),
+	opts := flashbotsrpc.FlashbotsCallBundleParam{
+		Txs:              []string{"YOUR_RAW_TX"},
+		BlockNumber:      fmt.Sprintf("0x%x", 13281018),
+		StateBlockNumber: "latest",
 	}
 
-	result, err := rpc.FlashbotsSendBundle(privateKey, sendBundleArgs)
+	result, err := rpc.FlashbotsCallBundle(privateKey, opts)
 	if err != nil {
-		if errors.Is(err, flashbotsrpc.ErrRelayErrorResponse) {
-			// ErrRelayErrorResponse means it's a standard Flashbots relay error response, so probably a user error, rather than JSON or network error
+		if errors.Is(err, flashbotsrpc.ErrRelayErrorResponse) { // user/tx error, rather than JSON or network error
 			fmt.Println(err.Error())
 		} else {
 			fmt.Printf("error: %+v\n", err)
