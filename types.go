@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"math/big"
+	"time"
 	"unsafe"
 
 	"github.com/pkg/errors"
@@ -383,6 +384,20 @@ type FlashbotsSendBundleRequest struct {
 	MinTimestamp *uint64   `json:"minTimestamp,omitempty"`      // (Optional) Number, the minimum timestamp for which this bundle is valid, in seconds since the unix epoch
 	MaxTimestamp *uint64   `json:"maxTimestamp,omitempty"`      // (Optional) Number, the maximum timestamp for which this bundle is valid, in seconds since the unix epoch
 	RevertingTxs *[]string `json:"revertingTxHashes,omitempty"` // (Optional) Array[String], A list of tx hashes that are allowed to revert
+}
+
+type FlashbotsGetBundleStatsParam struct {
+	BlockNumber string `json:"blockNumber"` // String, a hex encoded block number for which this bundle is valid on
+	BundleHash  string `json:"bundleHash"`  // String, returned by the flashbots api when calling eth_sendBundle
+}
+
+type FlashbotsGetBundleStatsResponse struct {
+	IsSimulated    bool      `json:"isSimulated"`
+	IsSentToMiners bool      `json:"isSentToMiners"`
+	IsHighPriority bool      `json:"isHighPriority"`
+	SimulatedAt    time.Time `json:"simulatedAt"`
+	SubmittedAt    time.Time `json:"submittedAt"`
+	SentToMinersAt time.Time `json:"sentToMinersAt"`
 }
 
 type FlashbotsSendBundleResponse struct {
