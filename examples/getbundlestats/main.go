@@ -36,6 +36,15 @@ func main() {
 		BundleHash:  result.BundleHash,
 	}
 	bundleStats, err := rpc.FlashbotsGetBundleStats(privateKey, getBundleStatsArgs)
+	if err != nil {
+		if errors.Is(err, flashbotsrpc.ErrRelayErrorResponse) {
+			// ErrRelayErrorResponse means it's a standard Flashbots relay error response, so probably a user error, rather than JSON or network error
+			fmt.Println(err.Error())
+		} else {
+			fmt.Printf("error: %+v\n", err)
+		}
+		return
+	}
 
 	// Print result
 	fmt.Printf("%+v\n", bundleStats)
