@@ -640,6 +640,15 @@ func (rpc *FlashbotsRPC) FlashbotsSendBundle(privKey *ecdsa.PrivateKey, param Fl
 	return res, err
 }
 
+func (rpc *FlashbotsRPC) FlashbotsGetBundleStats(privKey *ecdsa.PrivateKey, param FlashbotsGetBundleStatsParam) (res FlashbotsGetBundleStatsResponse, err error) {
+	rawMsg, err := rpc.CallWithFlashbotsSignature("flashbots_getBundleStats", privKey, param)
+	if err != nil {
+		return res, err
+	}
+	err = json.Unmarshal(rawMsg, &res)
+	return res, err
+}
+
 // Simulate a full Ethereum block. numTx is the maximum number of tx to include, used for troubleshooting (default: 0 - all transactions)
 func (rpc *FlashbotsRPC) FlashbotsSimulateBlock(privKey *ecdsa.PrivateKey, block *types.Block, maxTx int) (res FlashbotsCallBundleResponse, err error) {
 	if rpc.Debug {

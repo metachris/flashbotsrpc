@@ -1,6 +1,7 @@
 package flashbotsrpc
 
 import (
+	"crypto/ecdsa"
 	"errors"
 	"fmt"
 	"io/ioutil"
@@ -8,7 +9,9 @@ import (
 	"net/http"
 	"strconv"
 	"testing"
+	"time"
 
+	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/jarcoal/httpmock"
 	"github.com/stretchr/testify/require"
 	"github.com/stretchr/testify/suite"
@@ -17,7 +20,8 @@ import (
 
 type FlashbotsRPCTestSuite struct {
 	suite.Suite
-	rpc *FlashbotsRPC
+	rpc     *FlashbotsRPC
+	privKey *ecdsa.PrivateKey
 }
 
 func (s *FlashbotsRPCTestSuite) registerResponse(result string, callback func([]byte)) {
@@ -61,6 +65,9 @@ func (s *FlashbotsRPCTestSuite) paramsEqual(body []byte, expected string) {
 
 func (s *FlashbotsRPCTestSuite) SetupSuite() {
 	s.rpc = NewFlashbotsRPC("http://127.0.0.1:8545", WithHttpClient(http.DefaultClient), WithLogger(nil), WithDebug(false))
+
+	privateKey, _ := crypto.GenerateKey()
+	s.privKey = privateKey
 
 	httpmock.Activate()
 }
@@ -1146,6 +1153,44 @@ func (s *FlashbotsRPCTestSuite) TestEthUninstallFilter() {
 	s.Require().Nil(err)
 	boolRes, _ := strconv.ParseBool(result)
 	s.Require().Equal(boolRes, uninstall)
+}
+
+func (s *FlashbotsRPCTestSuite) TestFlashbotsGetBundleStats() {
+	params := FlashbotsGetBundleStatsParam{
+		BlockNumber: "0x7a69",
+		BundleHash:  "0xdeadc0de",
+	}
+
+	s.registerResponseError(errors.New("Error"))
+	_, err := s.rpc.FlashbotsGetBundleStats(s.privKey, params)
+	s.Require().NotNil(err)
+
+	response := `{
+  "isSimulated": true,
+  "isSentToMiners": true,
+  "isHighPriority": true,
+  "simulatedAt": "2021-08-06T21:36:06.317Z",
+  "submittedAt": "2021-08-06T21:36:06.250Z",
+  "sentToMinersAt": "2021-08-06T21:36:06.343Z"
+}`
+
+	s.registerResponse(response, func(body []byte) {
+		s.methodEqual(body, "flashbots_getBundleStats")
+		s.paramsEqual(body, `[{"blockNumber": "0x7a69", "bundleHash": "0xdeadc0de"}]`)
+	})
+
+	bundleStats, err := s.rpc.FlashbotsGetBundleStats(s.privKey, params)
+	s.Require().Nil(err)
+
+	expected := FlashbotsGetBundleStatsResponse{
+		IsSimulated:    true,
+		IsSentToMiners: true,
+		IsHighPriority: true,
+		SimulatedAt:    time.Date(2021, 8, 6, 21, 36, 6, 317000000, time.UTC),
+		SubmittedAt:    time.Date(2021, 8, 6, 21, 36, 6, 250000000, time.UTC),
+		SentToMinersAt: time.Date(2021, 8, 6, 21, 36, 6, 343000000, time.UTC),
+	}
+	s.Require().Equal(expected, bundleStats)
 }
 
 func TestFlashbotsRPCTestSuite(t *testing.T) {
