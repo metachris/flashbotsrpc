@@ -1,5 +1,7 @@
 package flashbotsrpc
 
+//lint:file-ignore SA4006 ignore for now
+
 import (
 	"crypto/ecdsa"
 	"errors"
@@ -1118,12 +1120,12 @@ func (s *FlashbotsRPCTestSuite) TestEthGetLogs() {
 	}]`
 	s.registerResponse(result, func(body []byte) {
 		s.methodEqual(body, "eth_getLogs")
-		s.paramsEqual(body, fmt.Sprintf(`[{
+		s.paramsEqual(body, `[{
 			"fromBlock": "0x1",
 			"toBlock": "0x10",
 			"address": ["0x8888f1f195afa192cfee860698584c030f4c9db1"],
 			"topics": [["0x111"], null]
-		}]`))
+		}]`)
 	})
 
 	logs, err := s.rpc.EthGetLogs(params)

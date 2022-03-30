@@ -1,5 +1,7 @@
 # Flashbots RPC client
 
+[![Test status](https://github.com/metachris/flashbotsrpc/workflows/Test/badge.svg)](https://github.com/metachris/flashbotsrpc/actions?query=workflow%3A%22Test%22)
+
 Fork of [ethrpc](https://github.com/onrik/ethrpc) with additional [Flashbots RPC methods](https://docs.flashbots.net/flashbots-auction/searchers/advanced/rpc-endpoint):
 
 * `FlashbotsCallBundle` ([`eth_callBundle`](https://docs.flashbots.net/flashbots-auction/searchers/advanced/rpc-endpoint/#eth_callbundle))
