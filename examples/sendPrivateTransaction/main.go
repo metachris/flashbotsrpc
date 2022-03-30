@@ -17,6 +17,9 @@ func main() {
 
 	sendPrivTxArgs := flashbotsrpc.FlashbotsSendPrivateTransactionRequest{
 		Tx: "0xYOUR_RAW_TX",
+		Preferences: &flashbotsrpc.FlashbotsPrivateTxPreferences{
+			Fast: true,
+		},
 	}
 
 	txHash, err := rpc.FlashbotsSendPrivateTransaction(privateKey, sendPrivTxArgs)
