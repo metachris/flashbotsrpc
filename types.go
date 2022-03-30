@@ -406,7 +406,12 @@ type FlashbotsSendBundleResponse struct {
 
 // sendPrivateTransaction
 type FlashbotsSendPrivateTransactionRequest struct {
-	Tx string `json:"tx"`
+	Tx          string                         `json:"tx"`
+	Preferences *FlashbotsPrivateTxPreferences `json:"preferences,omitempty"`
+}
+
+type FlashbotsPrivateTxPreferences struct {
+	Fast bool `json:"fast"`
 }
 
 // cancelPrivateTransaction
