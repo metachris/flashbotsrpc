@@ -1207,7 +1207,7 @@ func (s *FlashbotsRPCTestSuite) TestFlashbotsGetBundleStats() {
 		SimulatedAt:    time.Date(2022, 10, 6, 21, 36, 6, 317000000, time.UTC),
 		SubmittedAt:    time.Date(2022, 10, 6, 21, 36, 6, 250000000, time.UTC),
 		SentToMinersAt: time.Date(2022, 10, 6, 21, 36, 6, 343000000, time.UTC),
-		ConsideredByBuildersAt: []*ConsideredByBuildersAt{
+		ConsideredByBuildersAt: []*BuilderPubkeyWithTimestamp{
 			{
 				Pubkey:    "0x81babeec8c9f2bb9c329fd8a3b176032fe0ab5f3b92a3f44d4575a231c7bd9c31d10b6328ef68ed1e8c02a3dbc8e80f9",
 				Timestamp: time.Date(2022, 10, 6, 21, 36, 6, 343000000, time.UTC),
@@ -1217,7 +1217,7 @@ func (s *FlashbotsRPCTestSuite) TestFlashbotsGetBundleStats() {
 				Timestamp: time.Date(2022, 10, 6, 21, 36, 6, 394000000, time.UTC),
 			},
 		},
-		SealedByBuildersAt: []*SealedByBuildersAt{
+		SealedByBuildersAt: []*BuilderPubkeyWithTimestamp{
 			{
 				Pubkey:    "0x81beef03aafd3dd33ffd7deb337407142c80fea2690e5b3190cfc01bde5753f28982a7857c96172a75a234cb7bcb994f",
 				Timestamp: time.Date(2022, 10, 6, 21, 36, 7, 742000000, time.UTC),
