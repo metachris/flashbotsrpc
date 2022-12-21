@@ -392,12 +392,18 @@ type FlashbotsGetBundleStatsParam struct {
 }
 
 type FlashbotsGetBundleStatsResponse struct {
-	IsSimulated    bool      `json:"isSimulated"`
-	IsSentToMiners bool      `json:"isSentToMiners"`
-	IsHighPriority bool      `json:"isHighPriority"`
-	SimulatedAt    time.Time `json:"simulatedAt"`
-	SubmittedAt    time.Time `json:"submittedAt"`
-	SentToMinersAt time.Time `json:"sentToMinersAt"`
+	IsSimulated            bool                          `json:"isSimulated"`
+	IsSentToMiners         bool                          `json:"isSentToMiners"`
+	IsHighPriority         bool                          `json:"isHighPriority"`
+	SimulatedAt            time.Time                     `json:"simulatedAt"`
+	SubmittedAt            time.Time                     `json:"submittedAt"`
+	SentToMinersAt         time.Time                     `json:"sentToMinersAt"`
+	ConsideredByBuildersAt []*BuilderPubkeyWithTimestamp `json:"consideredByBuildersAt"`
+	SealedByBuildersAt     []*BuilderPubkeyWithTimestamp `json:"sealedByBuildersAt"`
+}
+type BuilderPubkeyWithTimestamp struct {
+	Pubkey    string    `json:"pubkey"`
+	Timestamp time.Time `json:"timestamp"`
 }
 
 type FlashbotsSendBundleResponse struct {

@@ -1171,9 +1171,25 @@ func (s *FlashbotsRPCTestSuite) TestFlashbotsGetBundleStats() {
   "isSimulated": true,
   "isSentToMiners": true,
   "isHighPriority": true,
-  "simulatedAt": "2021-08-06T21:36:06.317Z",
-  "submittedAt": "2021-08-06T21:36:06.250Z",
-  "sentToMinersAt": "2021-08-06T21:36:06.343Z"
+  "simulatedAt": "2022-10-06T21:36:06.317Z",
+  "submittedAt": "2022-10-06T21:36:06.250Z",
+  "sentToMinersAt": "2022-10-06T21:36:06.343Z",
+  "consideredByBuildersAt": [
+		{
+			"pubkey": "0x81babeec8c9f2bb9c329fd8a3b176032fe0ab5f3b92a3f44d4575a231c7bd9c31d10b6328ef68ed1e8c02a3dbc8e80f9", 
+			"timestamp": "2022-10-06T21:36:06.343Z"
+		},
+		{
+			"pubkey": "0x81beef03aafd3dd33ffd7deb337407142c80fea2690e5b3190cfc01bde5753f28982a7857c96172a75a234cb7bcb994f", 
+			"timestamp": "2022-10-06T21:36:06.394Z"
+		}
+	],
+  "sealedByBuildersAt": [
+    {
+      "pubkey": "0x81beef03aafd3dd33ffd7deb337407142c80fea2690e5b3190cfc01bde5753f28982a7857c96172a75a234cb7bcb994f",
+			"timestamp": "2022-10-06T21:36:07.742Z"
+		}
+  	]
 }`
 
 	s.registerResponse(response, func(body []byte) {
@@ -1188,9 +1204,25 @@ func (s *FlashbotsRPCTestSuite) TestFlashbotsGetBundleStats() {
 		IsSimulated:    true,
 		IsSentToMiners: true,
 		IsHighPriority: true,
-		SimulatedAt:    time.Date(2021, 8, 6, 21, 36, 6, 317000000, time.UTC),
-		SubmittedAt:    time.Date(2021, 8, 6, 21, 36, 6, 250000000, time.UTC),
-		SentToMinersAt: time.Date(2021, 8, 6, 21, 36, 6, 343000000, time.UTC),
+		SimulatedAt:    time.Date(2022, 10, 6, 21, 36, 6, 317000000, time.UTC),
+		SubmittedAt:    time.Date(2022, 10, 6, 21, 36, 6, 250000000, time.UTC),
+		SentToMinersAt: time.Date(2022, 10, 6, 21, 36, 6, 343000000, time.UTC),
+		ConsideredByBuildersAt: []*BuilderPubkeyWithTimestamp{
+			{
+				Pubkey:    "0x81babeec8c9f2bb9c329fd8a3b176032fe0ab5f3b92a3f44d4575a231c7bd9c31d10b6328ef68ed1e8c02a3dbc8e80f9",
+				Timestamp: time.Date(2022, 10, 6, 21, 36, 6, 343000000, time.UTC),
+			},
+			{
+				Pubkey:    "0x81beef03aafd3dd33ffd7deb337407142c80fea2690e5b3190cfc01bde5753f28982a7857c96172a75a234cb7bcb994f",
+				Timestamp: time.Date(2022, 10, 6, 21, 36, 6, 394000000, time.UTC),
+			},
+		},
+		SealedByBuildersAt: []*BuilderPubkeyWithTimestamp{
+			{
+				Pubkey:    "0x81beef03aafd3dd33ffd7deb337407142c80fea2690e5b3190cfc01bde5753f28982a7857c96172a75a234cb7bcb994f",
+				Timestamp: time.Date(2022, 10, 6, 21, 36, 7, 742000000, time.UTC),
+			},
+		},
 	}
 	s.Require().Equal(expected, bundleStats)
 }
