@@ -5,7 +5,7 @@ import (
 	"crypto/ecdsa"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"math/big"
 	"net/http"
@@ -56,7 +56,6 @@ type FlashbotsRPC struct {
 func New(url string, options ...func(rpc *FlashbotsRPC)) *FlashbotsRPC {
 	rpc := &FlashbotsRPC{
 		url:     url,
-		client:  http.DefaultClient,
 		log:     log.New(os.Stderr, "", log.LstdFlags),
 		Headers: make(map[string]string),
 		Timeout: 30 * time.Second,
@@ -64,7 +63,9 @@ func New(url string, options ...func(rpc *FlashbotsRPC)) *FlashbotsRPC {
 	for _, option := range options {
 		option(rpc)
 	}
-
+	rpc.client = &http.Client{
+		Timeout: rpc.Timeout,
+	}
 	return rpc
 }
 
@@ -115,11 +116,8 @@ func (rpc *FlashbotsRPC) Call(method string, params ...interface{}) (json.RawMes
 	for k, v := range rpc.Headers {
 		req.Header.Add(k, v)
 	}
-	httpClient := &http.Client{
-		Timeout: rpc.Timeout,
-	}
 
-	response, err := httpClient.Do(req)
+	response, err := rpc.client.Do(req)
 	if response != nil {
 		defer response.Body.Close()
 	}
@@ -127,7 +125,7 @@ func (rpc *FlashbotsRPC) Call(method string, params ...interface{}) (json.RawMes
 		return nil, err
 	}
 
-	data, err := ioutil.ReadAll(response.Body)
+	data, err := io.ReadAll(response.Body)
 	if err != nil {
 		return nil, err
 	}
@@ -181,11 +179,8 @@ func (rpc *FlashbotsRPC) CallWithFlashbotsSignature(method string, privKey *ecds
 	for k, v := range rpc.Headers {
 		req.Header.Add(k, v)
 	}
-	httpClient := &http.Client{
-		Timeout: rpc.Timeout,
-	}
 
-	response, err := httpClient.Do(req)
+	response, err := rpc.client.Do(req)
 	if response != nil {
 		defer response.Body.Close()
 	}
@@ -193,7 +188,7 @@ func (rpc *FlashbotsRPC) CallWithFlashbotsSignature(method string, privKey *ecds
 		return nil, err
 	}
 
-	data, err := ioutil.ReadAll(response.Body)
+	data, err := io.ReadAll(response.Body)
 	if err != nil {
 		return nil, err
 	}

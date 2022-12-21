@@ -6,7 +6,7 @@ import (
 	"crypto/ecdsa"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"math/big"
 	"net/http"
 	"strconv"
@@ -44,7 +44,7 @@ func (s *FlashbotsRPCTestSuite) registerResponseError(err error) {
 
 func (s *FlashbotsRPCTestSuite) getBody(request *http.Request) []byte {
 	defer request.Body.Close()
-	body, err := ioutil.ReadAll(request.Body)
+	body, err := io.ReadAll(request.Body)
 	s.Require().Nil(err)
 
 	return body
