@@ -410,6 +410,11 @@ type FlashbotsSendBundleResponse struct {
 	BundleHash string `json:"bundleHash"`
 }
 
+type BuilderBroadcastResponse struct {
+	BundleResponse FlashbotsSendBundleResponse `json:"bundleResponse"`
+	Err            error                       `json:"err"`
+}
+
 // sendPrivateTransaction
 type FlashbotsSendPrivateTransactionRequest struct {
 	Tx          string                         `json:"tx"`

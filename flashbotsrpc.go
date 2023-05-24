@@ -6,10 +6,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"math/big"
 	"net/http"
 	"os"
+	"sync"
 	"time"
 
 	"github.com/ethereum/go-ethereum/accounts"
@@ -729,4 +731,158 @@ func (rpc *FlashbotsRPC) FlashbotsCancelPrivateTransaction(privKey *ecdsa.Privat
 	}
 	err = json.Unmarshal(rawMsg, &cancelled)
 	return cancelled, err
+}
+
+type BuilderBroadcastRPC struct {
+	urls    []string
+	client  httpClient
+	log     logger
+	Debug   bool
+	Headers map[string]string // Additional headers to send with the request
+	Timeout time.Duration
+}
+
+// NewBuilderBroadcastRPC create broadcaster rpc client with given url
+func NewBuilderBroadcastRPC(urls []string, options ...func(rpc *BuilderBroadcastRPC)) *BuilderBroadcastRPC {
+	rpc := &BuilderBroadcastRPC{
+		urls:    urls,
+		log:     log.New(os.Stderr, "", log.LstdFlags),
+		Headers: make(map[string]string),
+		Timeout: 30 * time.Second,
+	}
+	for _, option := range options {
+		option(rpc)
+	}
+	rpc.client = &http.Client{
+		Timeout: rpc.Timeout,
+	}
+	return rpc
+}
+
+// https://docs.flashbots.net/flashbots-auction/searchers/advanced/rpc-endpoint/#eth_sendbundle
+func (broadcaster *BuilderBroadcastRPC) BroadcastBundle(privKey *ecdsa.PrivateKey, param FlashbotsSendBundleRequest) []BuilderBroadcastResponse {
+	requestResponses := broadcaster.broadcastRequest("eth_sendBundle", privKey, param)
+
+	responses := []BuilderBroadcastResponse{}
+
+	for _, requestResponse := range requestResponses {
+		if requestResponse.Err != nil {
+			responses = append(responses, BuilderBroadcastResponse{Err: requestResponse.Err})
+		}
+		fbResponse := FlashbotsSendBundleResponse{}
+		err := json.Unmarshal(requestResponse.Msg, &fbResponse)
+		responses = append(responses, BuilderBroadcastResponse{BundleResponse: fbResponse, Err: err})
+	}
+
+	return responses
+}
+
+type broadcastRequestResponse struct {
+	Msg json.RawMessage
+	Err error
+}
+
+func (broadcaster *BuilderBroadcastRPC) broadcastRequest(method string, privKey *ecdsa.PrivateKey, params ...interface{}) []broadcastRequestResponse {
+	request := rpcRequest{
+		ID:      1,
+		JSONRPC: "2.0",
+		Method:  method,
+		Params:  params,
+	}
+
+	body, err := json.Marshal(request)
+	if err != nil {
+		responseArr := []broadcastRequestResponse{{Msg: nil, Err: err}}
+		return responseArr
+	}
+
+	hashedBody := crypto.Keccak256Hash([]byte(body)).Hex()
+	sig, err := crypto.Sign(accounts.TextHash([]byte(hashedBody)), privKey)
+	if err != nil {
+		responseArr := []broadcastRequestResponse{{Msg: nil, Err: err}}
+		return responseArr
+	}
+
+	signature := crypto.PubkeyToAddress(privKey.PublicKey).Hex() + ":" + hexutil.Encode(sig)
+
+	var wg sync.WaitGroup
+	responseCh := make(chan []byte)
+
+	// Iterate over the URLs and send requests concurrently
+	for _, url := range broadcaster.urls {
+		wg.Add(1)
+
+		go func(url string) {
+			defer wg.Done()
+
+			// Create a new HTTP GET request
+			req, err := http.NewRequest("POST", url, bytes.NewBuffer(body))
+			if err != nil {
+				return
+			}
+
+			req.Header.Add("Content-Type", "application/json")
+			req.Header.Add("Accept", "application/json")
+			req.Header.Add("X-Flashbots-Signature", signature)
+			for k, v := range broadcaster.Headers {
+				req.Header.Add(k, v)
+			}
+
+			response, err := broadcaster.client.Do(req)
+			if response != nil {
+				defer response.Body.Close()
+			}
+			if err != nil {
+				return
+			}
+
+			// Read the response body
+			body, err := ioutil.ReadAll(response.Body)
+			if err != nil {
+				return
+			}
+
+			// Send the response body through the channel
+			responseCh <- body
+
+			if broadcaster.Debug {
+				broadcaster.log.Println(fmt.Sprintf("%s\nRequest: %s\nSignature: %s\nResponse: %s\n", method, body, signature, string(body)))
+			}
+
+		}(url)
+	}
+
+	go func() {
+		wg.Wait()
+		close(responseCh)
+	}()
+
+	responses := []broadcastRequestResponse{}
+	for data := range responseCh {
+		// On error, response looks like this instead of JSON-RPC: {"error":"block param must be a hex int"}
+		errorResp := new(RelayErrorResponse)
+		if err := json.Unmarshal(data, errorResp); err == nil && errorResp.Error != "" {
+			// relay returned an error
+			responseArr := []broadcastRequestResponse{{Msg: nil, Err: fmt.Errorf("%w: %s", ErrRelayErrorResponse, errorResp.Error)}}
+			return responseArr
+		}
+
+		resp := new(rpcResponse)
+		if err := json.Unmarshal(data, resp); err != nil {
+			responseArr := []broadcastRequestResponse{{Msg: nil, Err: err}}
+			return responseArr
+		}
+
+		if resp.Error != nil {
+			responseArr := []broadcastRequestResponse{{Msg: nil, Err: fmt.Errorf("%w: %s", ErrRelayErrorResponse, (*resp).Error.Message)}}
+			return responseArr
+		}
+
+		responses = append(responses, broadcastRequestResponse{
+			Msg: resp.Result,
+			Err: nil,
+		})
+	}
+
+	return responses
 }

@@ -65,6 +65,29 @@ if err != nil {
 fmt.Printf("%+v\n", result)
 ```
 
+#### Send a transaction bundle to a list of Builder endpoints with `eth_sendBundle` (full example [/examples/broadcastbundle]):
+
+```go
+urls := []string{
+	"https://relay.flashbots.net",
+    // Refer to https://www.mev.to/builders for builder endpoints 
+}
+rpc := flashbotsrpc.NewBuilderBroadcastRPC(urls)
+
+sendBundleArgs := flashbotsrpc.FlashbotsSendBundleRequest{
+    Txs:         []string{"YOUR_RAW_TX"},
+    BlockNumber: fmt.Sprintf("0x%x", 13281018),
+}
+
+results := rpc.BroadcastBundle(privateKey, sendBundleArgs)
+for _, result := range results {
+    if result.Err != nil {
+        log.Fatal(result.Err)
+    }
+    fmt.Printf("%+v\n", result.BundleResponse)
+}
+```
+
 #### More examples
 
 You can find example code in the [`/examples/` directory](https://github.com/metachris/flashbotsrpc/tree/master/examples).
