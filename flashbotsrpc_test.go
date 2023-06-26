@@ -1235,7 +1235,7 @@ func (s *FlashbotsRPCTestSuite) TestFlashbotsGetBundleStatsV2() {
 	}
 
 	s.registerResponseError(errors.New("Error"))
-	_, err := s.rpc.FlashbotsGetBundleStats(s.privKey, params)
+	_, err := s.rpc.FlashbotsGetBundleStatsV2(s.privKey, params)
 	s.Require().NotNil(err)
 
 	response := `{
