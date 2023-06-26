@@ -4,6 +4,7 @@ package flashbotsrpc
 
 import (
 	"crypto/ecdsa"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -1225,6 +1226,55 @@ func (s *FlashbotsRPCTestSuite) TestFlashbotsGetBundleStats() {
 		},
 	}
 	s.Require().Equal(expected, bundleStats)
+}
+
+func (s *FlashbotsRPCTestSuite) TestFlashbotsGetBundleStatsV2() {
+	params := FlashbotsGetBundleStatsParam{
+		BlockNumber: "0x10C063C",
+		BundleHash:  "0x9f93055488f7b9db678c14c1c5056c3ea01ef91e35c4f5e4cbeb6d8eb434f32d",
+	}
+
+	s.registerResponseError(errors.New("Error"))
+	_, err := s.rpc.FlashbotsGetBundleStats(s.privKey, params)
+	s.Require().NotNil(err)
+
+	response := `{
+	  "isSimulated": true,
+	  "isSentToMiners": true,
+	  "isHighPriority": true,
+	  "simulatedAt": "2022-10-06T21:36:06.317Z",
+	  "submittedAt": "2022-10-06T21:36:06.250Z",
+	  "sentToMinersAt": "2022-10-06T21:36:06.343Z",
+	  "consideredByBuildersAt": [
+			{
+				"pubkey": "0x81babeec8c9f2bb9c329fd8a3b176032fe0ab5f3b92a3f44d4575a231c7bd9c31d10b6328ef68ed1e8c02a3dbc8e80f9",
+				"timestamp": "2022-10-06T21:36:06.343Z"
+			},
+			{
+				"pubkey": "0x81beef03aafd3dd33ffd7deb337407142c80fea2690e5b3190cfc01bde5753f28982a7857c96172a75a234cb7bcb994f",
+				"timestamp": "2022-10-06T21:36:06.394Z"
+			}
+		],
+	  "sealedByBuildersAt": [
+	    {
+	      "pubkey": "0x81beef03aafd3dd33ffd7deb337407142c80fea2690e5b3190cfc01bde5753f28982a7857c96172a75a234cb7bcb994f",
+				"timestamp": "2022-10-06T21:36:07.742Z"
+			}
+	  	]
+	}`
+
+	s.registerResponse(response, func(body []byte) {
+		s.methodEqual(body, "flashbots_getBundleStatsV2")
+		s.paramsEqual(body, `[{"blockNumber": "0x10C063C", "bundleHash": "0x9f93055488f7b9db678c14c1c5056c3ea01ef91e35c4f5e4cbeb6d8eb434f32d"}]`)
+	})
+
+	bundleStats, err := s.rpc.FlashbotsGetBundleStatsV2(s.privKey, params)
+	s.Require().Nil(err)
+
+	bundleStatsExpected := FlashbotsGetBundleStatsResponseV2{}
+	err = json.Unmarshal([]byte(response), &bundleStatsExpected)
+	s.Require().Nil(err)
+	s.Require().Equal(bundleStatsExpected, bundleStats)
 }
 
 func TestFlashbotsRPCTestSuite(t *testing.T) {

@@ -401,6 +401,16 @@ type FlashbotsGetBundleStatsResponse struct {
 	ConsideredByBuildersAt []*BuilderPubkeyWithTimestamp `json:"consideredByBuildersAt"`
 	SealedByBuildersAt     []*BuilderPubkeyWithTimestamp `json:"sealedByBuildersAt"`
 }
+
+type FlashbotsGetBundleStatsResponseV2 struct {
+	IsSimulated            bool                          `json:"isSimulated"`
+	IsHighPriority         bool                          `json:"isHighPriority"`
+	SimulatedAt            time.Time                     `json:"simulatedAt"`
+	ReceivedAt             time.Time                     `json:"receivedAt"`
+	ConsideredByBuildersAt []*BuilderPubkeyWithTimestamp `json:"consideredByBuildersAt"`
+	SealedByBuildersAt     []*BuilderPubkeyWithTimestamp `json:"sealedByBuildersAt"`
+}
+
 type BuilderPubkeyWithTimestamp struct {
 	Pubkey    string    `json:"pubkey"`
 	Timestamp time.Time `json:"timestamp"`
