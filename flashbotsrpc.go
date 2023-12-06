@@ -777,10 +777,11 @@ func (broadcaster *BuilderBroadcastRPC) BroadcastBundle(privKey *ecdsa.PrivateKe
 	for _, requestResponse := range requestResponses {
 		if requestResponse.Err != nil {
 			responses = append(responses, BuilderBroadcastResponse{Err: requestResponse.Err})
+		} else {
+			fbResponse := FlashbotsSendBundleResponse{}
+			err := json.Unmarshal(requestResponse.Msg, &fbResponse)
+			responses = append(responses, BuilderBroadcastResponse{BundleResponse: fbResponse, Err: err})
 		}
-		fbResponse := FlashbotsSendBundleResponse{}
-		err := json.Unmarshal(requestResponse.Msg, &fbResponse)
-		responses = append(responses, BuilderBroadcastResponse{BundleResponse: fbResponse, Err: err})
 	}
 
 	return responses
@@ -872,19 +873,28 @@ func (broadcaster *BuilderBroadcastRPC) broadcastRequest(method string, privKey 
 		errorResp := new(RelayErrorResponse)
 		if err := json.Unmarshal(data, errorResp); err == nil && errorResp.Error != "" {
 			// relay returned an error
-			responseArr := []broadcastRequestResponse{{Msg: nil, Err: fmt.Errorf("%w: %s", ErrRelayErrorResponse, errorResp.Error)}}
-			return responseArr
+			responses = append(responses, broadcastRequestResponse{
+				Msg: nil,
+				Err: fmt.Errorf("%w: %s", ErrRelayErrorResponse, errorResp.Error),
+			})
+			continue
 		}
 
 		resp := new(rpcResponse)
 		if err := json.Unmarshal(data, resp); err != nil {
-			responseArr := []broadcastRequestResponse{{Msg: nil, Err: err}}
-			return responseArr
+			responses = append(responses, broadcastRequestResponse{
+				Msg: nil,
+				Err: err,
+			})
+			continue
 		}
 
 		if resp.Error != nil {
-			responseArr := []broadcastRequestResponse{{Msg: nil, Err: fmt.Errorf("%w: %s", ErrRelayErrorResponse, (*resp).Error.Message)}}
-			return responseArr
+			responses = append(responses, broadcastRequestResponse{
+				Msg: nil,
+				Err: fmt.Errorf("%w: %s", ErrRelayErrorResponse, (*resp).Error.Message),
+			})
+			continue
 		}
 
 		responses = append(responses, broadcastRequestResponse{
