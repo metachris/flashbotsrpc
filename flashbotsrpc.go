@@ -211,6 +211,11 @@ func (rpc *FlashbotsRPC) CallWithFlashbotsSignature(method string, privKey *ecds
 		return nil, err
 	}
 
+	if resp.ID != request.ID || resp.JSONRPC != request.JSONRPC {
+		// this means we got back JSON but not a valid JSONRPC response
+		return nil, fmt.Errorf("%w: invalid JSONRPC response (HTTP status code: %d)", ErrRelayErrorResponse, response.StatusCode)
+	}
+
 	if resp.Error != nil {
 		return nil, fmt.Errorf("%w: %s", ErrRelayErrorResponse, (*resp).Error.Message)
 	}

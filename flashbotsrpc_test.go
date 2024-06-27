@@ -10,6 +10,7 @@ import (
 	"io"
 	"math/big"
 	"net/http"
+	"net/http/httptest"
 	"strconv"
 	"testing"
 	"time"
@@ -1303,4 +1304,21 @@ func ptrInt(i int) *int {
 func newBigInt(s string) big.Int {
 	i, _ := new(big.Int).SetString(s, 10)
 	return *i
+}
+
+func TestCallWithFlashbotsSignature(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusInternalServerError)
+		_, err := w.Write([]byte(`{"something":"failed"}`))
+		require.NoError(t, err)
+	}))
+	defer server.Close()
+	rpc := NewFlashbotsRPC(server.URL)
+
+	key, err := crypto.GenerateKey()
+	require.NoError(t, err)
+	response, err := rpc.CallWithFlashbotsSignature("mock_Method", key, 42)
+	require.Nil(t, response)
+	require.Error(t, err, "500 should return an error")
+	require.True(t, errors.Is(err, ErrRelayErrorResponse))
 }
