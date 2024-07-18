@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/ecdsa"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -162,13 +163,10 @@ func (rpc *FlashbotsRPC) CallWithFlashbotsSignature(method string, privKey *ecds
 		return nil, err
 	}
 
-	hashedBody := crypto.Keccak256Hash([]byte(body)).Hex()
-	sig, err := crypto.Sign(accounts.TextHash([]byte(hashedBody)), privKey)
+	signature, err := rpc.GenerateSignature(privKey, body)
 	if err != nil {
 		return nil, err
 	}
-
-	signature := crypto.PubkeyToAddress(privKey.PublicKey).Hex() + ":" + hexutil.Encode(sig)
 
 	req, err := http.NewRequest("POST", rpc.url, bytes.NewBuffer(body))
 	if err != nil {
@@ -221,6 +219,20 @@ func (rpc *FlashbotsRPC) CallWithFlashbotsSignature(method string, privKey *ecds
 	}
 
 	return resp.Result, nil
+}
+
+func (rpc *FlashbotsRPC) GenerateSignature(privateKey *ecdsa.PrivateKey, body []byte) (string, error) {
+	if privateKey == nil {
+		return "", errors.New("privateKey not found")
+	}
+	hashedBody := crypto.Keccak256Hash(body).Hex()
+	sig, err := crypto.Sign(accounts.TextHash([]byte(hashedBody)), privateKey)
+	if err != nil {
+		return "", err
+	}
+
+	signature := crypto.PubkeyToAddress(privateKey.PublicKey).Hex() + ":" + hexutil.Encode(sig)
+	return signature, nil
 }
 
 // RawCall returns raw response of method call (Deprecated)
