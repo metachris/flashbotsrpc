@@ -11,6 +11,8 @@ import (
 	"math/big"
 	"net/http"
 	"os"
+	"strconv"
+	"strings"
 	"sync"
 	"time"
 
@@ -622,8 +624,30 @@ func (rpc *FlashbotsRPC) FlashbotsGetUserStats(privKey *ecdsa.PrivateKey, blockN
 	return res, err
 }
 
+// FlashbotsCallBundle simulate a bundle against a specific block number
 // https://docs.flashbots.net/flashbots-auction/searchers/advanced/rpc-endpoint#eth_callbundle
 func (rpc *FlashbotsRPC) FlashbotsCallBundle(privKey *ecdsa.PrivateKey, param FlashbotsCallBundleParam) (res FlashbotsCallBundleResponse, err error) {
+	// validate the input
+	if len(param.Txs) == 0 {
+		return FlashbotsCallBundleResponse{}, fmt.Errorf("txs are empty")
+	}
+
+	if param.BlockNumber == "" {
+		return FlashbotsCallBundleResponse{}, fmt.Errorf("blockNumber is empty")
+	}
+
+	blockNumber, err := strconv.ParseInt(strings.ReplaceAll(param.BlockNumber, "0x", ""), 16, 64)
+	if err != nil {
+		return FlashbotsCallBundleResponse{}, fmt.Errorf("blockNumber is invalid")
+	}
+	if blockNumber <= 0 {
+		return FlashbotsCallBundleResponse{}, fmt.Errorf("blockNumber is smaller than zero")
+	}
+
+	if param.StateBlockNumber == "" {
+		return FlashbotsCallBundleResponse{}, fmt.Errorf("stateBlockNumber is empty")
+	}
+
 	rawMsg, err := rpc.CallWithFlashbotsSignature("eth_callBundle", privKey, param)
 	if err != nil {
 		return res, err
