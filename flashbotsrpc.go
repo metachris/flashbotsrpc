@@ -62,11 +62,13 @@ func New(url string, options ...func(rpc *FlashbotsRPC)) *FlashbotsRPC {
 		Headers: make(map[string]string),
 		Timeout: 30 * time.Second,
 	}
-	for _, option := range options {
-		option(rpc)
-	}
+
 	rpc.client = &http.Client{
 		Timeout: rpc.Timeout,
+	}
+	// this way if client is set explicitly it overwrites timeout preferences set above
+	for _, option := range options {
+		option(rpc)
 	}
 	return rpc
 }
