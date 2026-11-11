@@ -27,6 +27,7 @@ func main() {
 		"https://rpc.lightspeedbuilder.info",
 		"https://rpc.nfactorial.xyz",
 		"https://rpc.lokibuilder.xyz",
+		"https://rpc.aquabuilder.online",
 	}
 
 	rpc := flashbotsrpc.NewBuilderBroadcastRPC(urls)
